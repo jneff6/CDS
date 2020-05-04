@@ -1,0 +1,165 @@
+
+---
+title: "Lab 11: IInteractive visualisations and dashboards in R"
+author: "Jacob Neff"
+date: "Date of lab session"
+documentclass: article
+geometry: margin=1in
+fontsize: 11pt
+output:
+  pdf_document:
+    highlight: tango
+  html_document:
+    highlight: tango
+    self_contained: true
+  github_document:
+    html_preview: false
+---
+
+```{r setup, include = FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+# Set knitr options
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load required packages
+suppressPackageStartupMessages(library(tidyverse, quietly = TRUE))
+suppressPackageStartupMessages(library(plotly, quietly = TRUE))
+suppressPackageStartupMessages(library(leaflet, quietly = TRUE))
+suppressPackageStartupMessages(library(RColorBrewer, quietly = TRUE))
+suppressPackageStartupMessages(library(GGally, quietly = TRUE))
+suppressPackageStartupMessages(library(flexdashboard, quietly = TRUE))
+
+# Load data
+wine <- read_csv("Red_wine_dataset.csv")
+map <- read_csv("map_data.csv")
+```
+
+* * *
+
+## Lab report
+
+## Exercises
+
+#### Exercise 1
+```{r}
+wine%>%
+str('data.frame')
+```
+**13 columns 1599 Rows. Data type of Label = character** 
+
+#### Exercise 2
+
+```{r}
+ggplot(data = wine) +
+  geom_bar(aes(x = Label),fill="steelblue") +
+  # Adding plot title and y-axis label
+  labs(title = "Distribution of Red Wines", y = "Count") +
+  # Adding a theme to the plot
+  theme_minimal() 
+```
+
+Based on the distibution based on the quality of wine, "Average" wine has the largest number produced.
+
+
+#### Exercise 3
+
+```{r}
+ggplot(data = wine) +
+  geom_bar(aes(x = Label),fill="orange") +
+  # Adding plot title and y-axis label
+  labs(title = "Distribution of Red Wines", y = "Count") +
+  # Adding a theme to the plot
+  theme_bw() 
+```
+
+
+
+#### Exericse 4
+```{r}
+# From "GGally" package
+ggcorr(wine[1:12],
+       label = TRUE, 
+       label_size = 2, 
+       label_alpha = TRUE,
+       size = 3)
+```
+
+Alcohol has the highest positve correlation with quality, and volatile acidity has the highest negative correlation with quality. 
+
+
+#### Exericse 5
+It can be concluded that alcohol correlates strongest with producing the greatest quality of wine in most cases as displayed in the chart. Volatile acidity negtively impacts the quality of wine most often.
+
+
+#### Exericse 6
+```{r}
+wine %>%
+ggplot() +
+  geom_point(mapping = aes(x = Alcohol, y = Volatile_acidity, color = Alcohol)) +
+  labs(x = "Alcohol %", title="Alcohol VS Volatile Acidity") +
+  theme_get()
+```
+
+
+
+
+#### Exericse 7
+
+```{r}
+ggplotly(ggplot(data = wine) +
+  geom_point(mapping = aes(x = Alcohol, y = Volatile_acidity, color = Alcohol)) +
+  labs(x = "Alcohol %", title="Alcohol VS Volatile Acidity") +
+  theme_get())
+```
+
+
+
+#### Exericse 8
+
+```{r}
+map %>%
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(
+    lat = ~Lat,
+    lng = ~Lon
+  )
+```
+
+#### Exercise 9
+
+```{r}
+map %>%
+  leaflet() %>%
+  addTiles() %>%
+  addCircleMarkers(
+    lat = ~Lat,
+    lng = ~Lon
+  )
+```
+
+
+#### Exericse 10
+
+```{r}
+map %>%
+leaflet() %>%
+  addProviderTiles(providers$OpenStreetMap.DE) %>%
+  setView(lng = -175.243683, lat =  50.052235, zoom = 3) %>%
+  addCircleMarkers(lat = ~Lat, lng = ~Lon)
+```
+
+After changing the provider of the map it changed the style it was shown. Adjusting the values for longitude and latitude changes the default location shown for winery's within a particular region. 
+
+
+#### Exericse 11
+```{r}
+map %>%
+leaflet() %>%
+  addProviderTiles(providers$Esri.WorldStreetMap) %>%
+  setView(lng = -100.243683, lat =  34.052235, zoom = 3) %>%
+  addCircleMarkers(lat = ~Lat, lng = ~Lon,
+             popup = paste("Name:", map$Name, "<br>",
+                            "Rank:", map$Rank, "<br>",
+                           "Address:", map$Address, "<br>"))
+```
